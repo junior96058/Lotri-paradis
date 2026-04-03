@@ -1,0 +1,165 @@
+Men kòd konplè `index.html` la:
+
+```html
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Lotri Paradis 🎰</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <!-- LOADING SCREEN -->
+  <div id="loadingScreen" class="loading-screen">
+    <div class="loading-logo">🎰</div>
+    <div class="loading-title">Lotri Paradis</div>
+    <div class="loading-bar"><div class="loading-fill"></div></div>
+    <p class="loading-text">Ap chaje...</p>
+  </div>
+
+  <!-- AUTH SCREEN -->
+  <div id="authScreen" class="screen hidden">
+    <div class="auth-bg-deco"></div>
+    <div class="auth-container">
+
+      <div class="auth-logo">
+        <span class="logo-emoji">🎰</span>
+        <h1 class="logo-title">Lotri Paradis</h1>
+        <p class="logo-sub">Jwe gratis. Jwenn kont ou.</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Konekte</button>
+        <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')">Kreye Kont</button>
+      </div>
+
+      <!-- Login -->
+      <div id="loginForm" class="auth-form">
+        <div class="input-group">
+          <span class="input-icon">✉️</span>
+          <input type="email" id="loginEmail" placeholder="Imel ou" autocomplete="email" />
+        </div>
+        <div class="input-group">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="loginPassword" placeholder="Modpas ou" autocomplete="current-password" />
+        </div>
+        <button class="btn-primary" onclick="login()">
+          <span>Konekte</span> <span class="btn-arrow">→</span>
+        </button>
+        <p id="loginError" class="auth-error hidden"></p>
+      </div>
+
+      <!-- Signup -->
+      <div id="signupForm" class="auth-form hidden">
+        <div class="input-group">
+          <span class="input-icon">👤</span>
+          <input type="text" id="signupName" placeholder="Non ou" autocomplete="name" />
+        </div>
+        <div class="input-group">
+          <span class="input-icon">✉️</span>
+          <input type="email" id="signupEmail" placeholder="Imel ou" autocomplete="email" />
+        </div>
+        <div class="input-group">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="signupPassword" placeholder="Modpas ou (min 6)" autocomplete="new-password" />
+        </div>
+        <button class="btn-primary" onclick="signup()">
+          <span>Kreye Kont</span> <span class="btn-arrow">✨</span>
+        </button>
+        <p id="signupError" class="auth-error hidden"></p>
+      </div>
+
+      <p class="auth-disclaimer">🎮 Jwèt gratis • Pa gen lajan reyèl</p>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="gameScreen" class="screen hidden">
+
+    <header class="game-header">
+      <div class="header-left">
+        <span class="header-logo">🎰</span>
+        <span class="header-title">Lotri Paradis</span>
+      </div>
+      <div class="header-right">
+        <div class="coin-display">
+          <span class="coin-icon">🪙</span>
+          <span id="coinBalance">0</span>
+        </div>
+        <button class="btn-logout" onclick="logout()" title="Dekonekte">⬅️</button>
+      </div>
+    </header>
+
+    <div class="welcome-banner">
+      <p>Bonjou, <strong id="userName">Jwè</strong>! 👋</p>
+      <p class="welcome-sub">Chwazi 6 nimewo epi eseye chans ou!</p>
+    </div>
+
+    <div class="game-card">
+      <div class="section-title"><span>🔢</span> Chwazi 6 Nimewo (1–49)</div>
+      <div class="number-grid" id="numberGrid"></div>
+
+      <div class="selected-display">
+        <p class="selected-label">Nimewo ou chwazi:</p>
+        <div class="selected-numbers" id="selectedNumbers">
+          <span class="empty-pick">— — — — — —</span>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn-auto" onclick="autoSelect()">🎲 Otomatik</button>
+        <button class="btn-clear" onclick="clearSelection()">🗑️ Efase</button>
+      </div>
+
+      <div class="cost-info">
+        <span>💰 Pri: <strong>50 kob</strong> pa jwèt</span>
+      </div>
+
+      <button class="btn-play" id="playBtn" onclick="playLottery()">
+        🎰 JWE KOUNYE A!
+      </button>
+    </div>
+
+    <!-- Result Card -->
+    <div class="result-card hidden" id="resultCard">
+      <div class="result-title" id="resultTitle"></div>
+      <div class="draw-section">
+        <p class="draw-label">Nimewo ki soti:</p>
+        <div class="draw-numbers" id="drawNumbers"></div>
+      </div>
+      <div class="draw-section">
+        <p class="draw-label">Nimewo pa ou:</p>
+        <div class="draw-numbers" id="userNumbers"></div>
+      </div>
+      <div class="match-info" id="matchInfo"></div>
+      <div class="reward-info" id="rewardInfo"></div>
+    </div>
+
+    <!-- History Card -->
+    <div class="history-card" id="historyCard">
+      <div class="section-title"><span>📜</span> Dènye 5 Jwèt</div>
+      <div id="historyList">
+        <p class="history-empty">Pa gen istwa ankò. Jwe premye jwèt ou!</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Confetti -->
+  <div id="confettiContainer"></div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+```
+
+Kopye tout sa a, kole nan `index.html` ou nan Acode, epi ou bon! 👍
